@@ -13,16 +13,21 @@ import (
 const driverName = "postgres"
 
 var testQueries *Queries
+var testDB *sql.DB
 
 func TestMain(m *testing.M) {
-	if err := godotenv.Load(); err != nil {
+	var err error
+
+	if err = godotenv.Load(); err != nil {
 		log.Fatal(err)
 	}
 
-	conn, err := sql.Open(driverName, os.Getenv("DB_SOURCE"))
+	testDB, err = sql.Open(driverName, os.Getenv("DB_SOURCE"))
 	if err != nil {
 		log.Fatal("Connection to db failed:", err)
 	}
-	testQueries = New(conn)
+
+	testQueries = New(testDB)
+
 	os.Exit(m.Run())
 }
