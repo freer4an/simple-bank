@@ -2,10 +2,10 @@ package db
 
 import (
 	"context"
-	"simple-bank/util"
 	"testing"
 	"time"
 
+	"github.com/freer4an/simple-bank/util"
 	"github.com/stretchr/testify/require"
 )
 
