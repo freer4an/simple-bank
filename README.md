@@ -12,6 +12,6 @@ Original [repository](https://github.com/techschool/simplebank/).
 * Transfer money between 2 accounts
 * List accounts with pagination
 
-## ---
+## 
 
 This project helped a lot in understanding SQL at an advanced level, to understand how to write good tests on the database layer, to perform pagination and etc.
