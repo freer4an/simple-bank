@@ -7,10 +7,12 @@ Original [repository](https://github.com/techschool/simplebank/).
 
 ## Project operations
 
-* Create an account
+* Create a user
+* Create an accounts with different currencies
 * Record account balance changes history for each account
 * Transfer money between 2 accounts
 * List accounts with pagination
+* Generate JWT or Paseto tokens
 
 ## 
 
