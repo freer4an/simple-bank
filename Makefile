@@ -31,4 +31,4 @@ server:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/freer4an/simple-bank/db/sqlc Store
 
-.PHONY: postgres createdb dropdb migrateup, migratedown, sqlc, test, server, mock, dockerrun
+.PHONY: postgres createdb dropdb migrateup, migratedown, sqlc, test, server, mock
