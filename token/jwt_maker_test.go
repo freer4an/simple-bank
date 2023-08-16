@@ -10,7 +10,7 @@ import (
 )
 
 func TestJWTmaker(t *testing.T) {
-	maker, err := NewJWTmaker(util.RandomStr(32))
+	maker, err := NewJWTMaker(util.RandomStr(32))
 	require.NoError(t, err)
 
 	username := util.RandomOwner()
@@ -33,7 +33,7 @@ func TestJWTmaker(t *testing.T) {
 }
 
 func TestExpiredJWTToken(t *testing.T) {
-	maker, err := NewJWTmaker(util.RandomStr(32))
+	maker, err := NewJWTMaker(util.RandomStr(32))
 	require.NoError(t, err)
 
 	token, err := maker.CreateToken(util.RandomOwner(), -time.Minute)
@@ -47,7 +47,7 @@ func TestExpiredJWTToken(t *testing.T) {
 }
 
 func TestInvalidKeySize(t *testing.T) {
-	_, err := NewJWTmaker(util.RandomStr(30))
+	_, err := NewJWTMaker(util.RandomStr(30))
 	require.Error(t, err)
 }
 
@@ -57,7 +57,7 @@ func TestInvalidJWTTokenAlgNone(t *testing.T) {
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodNone, jwt.MapClaims{})
 
-	maker, err := NewJWTmaker(util.RandomStr(32))
+	maker, err := NewJWTMaker(util.RandomStr(32))
 	require.NoError(t, err)
 
 	token, err := jwtToken.SignedString(jwt.UnsafeAllowNoneSignatureType)
@@ -70,7 +70,7 @@ func TestInvalidJWTTokenAlgNone(t *testing.T) {
 }
 
 func TestJWTmakerTe(t *testing.T) {
-	maker, err := NewJWTmaker(util.RandomStr(32))
+	maker, err := NewJWTMaker(util.RandomStr(32))
 	require.NoError(t, err)
 
 	username := util.RandomOwner()

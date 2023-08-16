@@ -22,7 +22,11 @@ func main() {
 	}
 
 	store := db.NewStore(conn)
-	server := api.NewServer(store)
+
+	server, err := api.NewServer(config, store)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if err := server.Start(config.SB_ADDR); err != nil {
 		log.Fatal(err)
