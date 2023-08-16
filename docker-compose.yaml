@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:alpine
+    environment:
+      - POSTGRES_USER=ady
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=simple_bank
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ady -d simple_bank"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_SOURCE=postgresql://ady:password@postgres:5432/simple_bank?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
+
