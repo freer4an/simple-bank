@@ -22,10 +22,10 @@ func NewJWTMaker(secretKey string) (Maker, error) {
 }
 
 // Creates token for a specific username
-func (maker *JWTmaker) CreateToken(username string, duration time.Duration) (string, error) {
+func (maker *JWTmaker) CreateToken(username string, duration time.Duration) (string, *Payload, error) {
 	payload, err := NewPayload(username, duration)
 	if err != nil {
-		return "", err
+		return "", payload, err
 	}
 
 	claims := jwt.MapClaims{
@@ -35,10 +35,9 @@ func (maker *JWTmaker) CreateToken(username string, duration time.Duration) (str
 		"expired_at": payload.ExpiresAt.Unix(),
 	}
 
-	payload = nil
-
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return jwtToken.SignedString([]byte(maker.secretKey))
+	token, err := jwtToken.SignedString([]byte(maker.secretKey))
+	return token, payload, err
 }
 
 // Check if the token is valid
