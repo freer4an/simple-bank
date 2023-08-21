@@ -1,2 +1,2 @@
-db/sqlc/main_test.go
 app.env
+db/sqlc/main_test.go
