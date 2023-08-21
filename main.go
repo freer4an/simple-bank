@@ -11,6 +11,10 @@ import (
 	"github.com/freer4an/simple-bank/gapi"
 	"github.com/freer4an/simple-bank/pb"
 	"github.com/freer4an/simple-bank/util"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
@@ -28,6 +32,8 @@ func main() {
 	if err != nil {
 		log.Fatal("Connection to db failed:", err)
 	}
+
+	runDBmigration(config.MigrattionURL, config.DB_source)
 
 	store := db.NewStore(conn)
 
@@ -84,6 +90,9 @@ func runGatewayServer(config util.Config, store db.Store) {
 	mux := http.NewServeMux()
 	mux.Handle("/", grpcMux)
 
+	fs := http.FileServer(http.Dir("./docs/swagger"))
+	mux.Handle("/swagger/", http.StripPrefix("/swagger/", fs))
+
 	listener, err := net.Listen("tcp", config.HttpServerAddr)
 	if err != nil {
 		log.Fatal("cannot create listener: ", err)
@@ -105,3 +114,15 @@ func runGatewayServer(config util.Config, store db.Store) {
 // 		log.Fatal("can't start the HTTP server", err)
 // 	}
 // }
+
+func runDBmigration(migrationUrl, dbSource string) {
+	migration, err := migrate.New(migrationUrl, dbSource)
+	if err != nil {
+		log.Fatal("migration error: ", err)
+	}
+	if err = migration.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Fatal("migration up error: ", err)
+	}
+
+	log.Println("migration succes")
+}
