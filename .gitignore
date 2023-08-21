@@ -1,1 +1,2 @@
+db/sqlc/main_test.go
 app.env
