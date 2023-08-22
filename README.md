@@ -7,7 +7,8 @@ Original [repository](https://github.com/techschool/simplebank/).
 
 ## Project operations
 
-* Create a user
+* Create a new user
+* Update a user
 * Create an accounts with different currencies
 * Record account balance changes history for each account
 * Transfer money between 2 accounts
@@ -16,4 +17,4 @@ Original [repository](https://github.com/techschool/simplebank/).
 
 ## 
 
-This project helped a lot in understanding SQL at an advanced level, to understand how to write good tests on the database layer, to perform pagination and etc.
+This project helped a lot in understanding SQL at an advanced level, to understand how to write good tests on the database layer, to perform pagination, to work with gRPC, gRPC-gateway and etc.
