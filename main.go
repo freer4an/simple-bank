@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"os"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -42,16 +43,20 @@ func main() {
 	}
 
 	runDBmigration(config.MigrattionURL, config.DB_source)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	redisCli := runRedis(ctx, config)
 
 	store := db.NewStore(conn)
 
-	go runGatewayServer(config, store)
-	runGrpcServer(config, store)
+	go runGatewayServer(ctx, config, store, redisCli)
+	runGrpcServer(config, store, redisCli)
 
 }
 
-func runGrpcServer(config util.Config, store db.Store) {
-	server, err := gapi.NewServer(config, store)
+func runGrpcServer(config util.Config, store db.Store, redis *redis.Client) {
+	server, err := gapi.NewServer(config, store, redis)
 	if err != nil {
 		log.Fatal().Err(err).Msg("can't create gRPC server")
 	}
@@ -72,8 +77,8 @@ func runGrpcServer(config util.Config, store db.Store) {
 	}
 }
 
-func runGatewayServer(config util.Config, store db.Store) {
-	server, err := gapi.NewServer(config, store)
+func runGatewayServer(ctx context.Context, config util.Config, store db.Store, redis *redis.Client) {
+	server, err := gapi.NewServer(config, store, redis)
 	if err != nil {
 		log.Fatal().Err(err).Msg("can't create gRPC server")
 	}
@@ -88,9 +93,6 @@ func runGatewayServer(config util.Config, store db.Store) {
 	})
 
 	grpcMux := runtime.NewServeMux(jsonOption)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	if err = pb.RegisterSimpleBankHandlerServer(ctx, grpcMux, server); err != nil {
 		log.Fatal().Err(err).Msg("cannot register handler server")
@@ -114,16 +116,19 @@ func runGatewayServer(config util.Config, store db.Store) {
 	}
 }
 
-// func runGinServer(config util.Config, store db.Store) {
-// 	server, err := api.NewServer(config, store)
-// 	if err != nil {
-// 		log.Fatal().Err(err).Msg("can't create HTTP server: ", err)
-// 	}
+func runRedis(ctx context.Context, config util.Config) (client *redis.Client) {
+	client = redis.NewClient(&redis.Options{
+		Addr:     config.RedisSource,
+		Password: "",
+		DB:       0,
+	})
 
-// 	if err := server.Start(config.HttpServerAddr); err != nil {
-// 		log.Fatal().Err(err).Msg("can't start the HTTP server", err)
-// 	}
-// }
+	if err := client.Ping(ctx).Err(); err != nil {
+		log.Fatal().Err(err)
+	}
+
+	return
+}
 
 func runDBmigration(migrationUrl, dbSource string) {
 	migration, err := migrate.New(migrationUrl, dbSource)
@@ -136,3 +141,14 @@ func runDBmigration(migrationUrl, dbSource string) {
 
 	log.Info().Msg("migration succes")
 }
+
+// func runGinServer(config util.Config, store db.Store) {
+// 	server, err := api.NewServer(config, store)
+// 	if err != nil {
+// 		log.Fatal().Err(err).Msg("can't create HTTP server: ", err)
+// 	}
+
+// 	if err := server.Start(config.HttpServerAddr); err != nil {
+// 		log.Fatal().Err(err).Msg("can't start the HTTP server", err)
+// 	}
+// }

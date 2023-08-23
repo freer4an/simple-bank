@@ -4,8 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
-	db "github.com/freer4an/simple-bank/db/sqlc"
+	"github.com/freer4an/simple-bank/models"
 	"github.com/freer4an/simple-bank/pb"
 	"github.com/freer4an/simple-bank/util"
 	"google.golang.org/grpc/codes"
@@ -39,16 +40,16 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 	}
 
 	md := server.extractMetadata(ctx)
-
-	session, err := server.store.CreateSession(ctx, db.CreateSessionParams{
+	session := models.Session{
 		ID:           refreshPayload.ID,
 		Username:     user.Username,
 		RefreshToken: refreshToken,
 		UserAgent:    md.UserAgent,
 		ClientIp:     md.ClientIP,
-		IsBlocked:    false,
 		ExpiresAt:    refreshPayload.ExpiresAt,
-	})
+	}
+
+	err = server.redis.Set(ctx, req.Username, session, 2*24*time.Hour).Err()
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

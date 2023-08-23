@@ -7,6 +7,7 @@ import (
 	"github.com/freer4an/simple-bank/pb"
 	"github.com/freer4an/simple-bank/token"
 	"github.com/freer4an/simple-bank/util"
+	"github.com/redis/go-redis/v9"
 )
 
 // banking service server
@@ -15,10 +16,11 @@ type Server struct {
 	config     util.Config
 	store      db.Store
 	tokenMaker token.Maker
+	redis      *redis.Client
 }
 
 // NewServer creates new gRPC server
-func NewServer(config util.Config, store db.Store) (*Server, error) {
+func NewServer(config util.Config, store db.Store, redis *redis.Client) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("error token maker: %w", err)
@@ -27,6 +29,7 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 		config:     config,
 		store:      store,
 		tokenMaker: tokenMaker,
+		redis:      redis,
 	}
 
 	return server, nil
