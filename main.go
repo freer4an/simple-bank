@@ -46,7 +46,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	redisCli := runRedis(ctx, config)
+	redisCli := runRedis(ctx, config.RedisSource, config.RedisPassword)
 
 	store := db.NewStore(conn)
 
@@ -116,10 +116,10 @@ func runGatewayServer(ctx context.Context, config util.Config, store db.Store, r
 	}
 }
 
-func runRedis(ctx context.Context, config util.Config) (client *redis.Client) {
+func runRedis(ctx context.Context, addr, password string) (client *redis.Client) {
 	client = redis.NewClient(&redis.Options{
-		Addr:     config.RedisSource,
-		Password: "",
+		Addr:     addr,
+		Password: password,
 		DB:       0,
 	})
 

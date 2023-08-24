@@ -3,14 +3,22 @@ services:
   postgres:
     image: postgres:alpine
     environment:
-      - POSTGRES_USER=ady
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=simple_bank
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ady -d simple_bank"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
+  redis:
+    image: redis:alpine
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+    ports:
+      - "6379:6379"
+    command: "redis-server --requirepass ${REDIS_PASSWORD}"
   api:
     build:
       context: .
@@ -18,9 +26,11 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DB_SOURCE=postgresql://ady:password@postgres:5432/simple_bank?sslmode=disable
+      - DB_SOURCE=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+      - REDIS_SOURCE=redis:6379
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: always
-
