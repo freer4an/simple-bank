@@ -4,6 +4,7 @@ package pb;
 
 import "google/api/annotations.proto";
 import "rpc_create_user.proto";
+import "rpc_new_access.proto";
 import "rpc_update_user.proto";
 import "rpc_login_user.proto";
 
@@ -49,6 +50,17 @@ service SimpleBank {
     rpc LoginUser (LoginUserRequest) returns (LoginUserResponse) {
         option (google.api.http) = {
             post: "/v1/login_user"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            description: "Use this API to login user and get access token & refresh token";
+            summary: "Login user";
+        };
+    }
+
+    rpc RenewAcces (RefreshTokenReq) returns (RefreshTokenRsp) {
+        option (google.api.http) = {
+            post: "/v1/refresh_token"
             body: "*"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {

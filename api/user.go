@@ -7,6 +7,7 @@ import (
 	"time"
 
 	db "github.com/freer4an/simple-bank/db/sqlc"
+	"github.com/freer4an/simple-bank/models"
 	"github.com/freer4an/simple-bank/util"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -123,15 +124,16 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	session, err := server.store.CreateSession(ctx, db.CreateSessionParams{
+	session := models.Session{
 		ID:           refreshPayload.ID,
 		Username:     user.Username,
 		RefreshToken: refreshToken,
 		UserAgent:    ctx.Request.UserAgent(),
 		ClientIp:     ctx.ClientIP(),
-		IsBlocked:    false,
 		ExpiresAt:    refreshPayload.ExpiresAt,
-	})
+	}
+
+	err = server.redis.Set(ctx, refreshPayload.Username, session, 2*24*time.Hour).Err()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

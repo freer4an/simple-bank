@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package pb;
+option go_package = "github.com/freer4an/simple-bank/pb";
+import "google/protobuf/timestamp.proto";
+
+message RefreshTokenReq {
+    string refresh_token = 1;
+}
+
+message RefreshTokenRsp {
+    string access_token = 1;
+    google.protobuf.Timestamp access_token_expires = 2;
+}

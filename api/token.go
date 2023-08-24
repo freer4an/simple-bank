@@ -1,12 +1,11 @@
 package api
 
 import (
-	"database/sql"
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/freer4an/simple-bank/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,19 +31,14 @@ func (server *Server) renewAccesToken(ctx *gin.Context) {
 		return
 	}
 
-	session, err := server.store.GetSession(ctx, refreshPayload.ID)
+	var session models.Session
+	err = server.redis.Get(ctx, refreshPayload.Username).Scan(&session)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
+		// if errors.Is(err, redis.) {
+		// 	ctx.JSON(http.StatusNotFound, errorResponse(err))
+		// 	return
+		// }
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-
-	if session.IsBlocked {
-		err := fmt.Errorf("blocked session")
-		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 
