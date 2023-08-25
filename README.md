@@ -9,7 +9,7 @@ Original [repository](https://github.com/techschool/simplebank/).
 
 * Create a new user
 * Update a user
-* Create an accounts with different currencies
+* Create accounts with different currencies
 * Record account balance changes history for each account
 * Transfer money between 2 accounts
 * List accounts with pagination
